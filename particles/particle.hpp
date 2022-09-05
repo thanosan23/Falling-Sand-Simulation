@@ -6,7 +6,8 @@
 
 enum ParticleType {
   EMPTY,
-  SAND
+  SAND,
+  WALL
 };
 
 struct Particle {
@@ -24,6 +25,9 @@ struct Particle {
           break;
         case(SAND):
           this->color = BROWN;
+          break;
+        case(WALL):
+          this->color = BLACK;
           break;
       }
     }
@@ -54,32 +58,39 @@ struct ParticleManager {
     return &particles[pos.y * this->gridSize.x + pos.x];
   }
 
-  void drawParticles() {
-    for(u32 y = 0; y < this->gridSize.y; ++y) {
-      for(u32 x = 0; x < this->gridSize.x; ++x) {
-        Particle *p = this->getParticle(vec2<u32>(x, y));
-        DrawRectangle(p->pos.x * this->particleSize.x,
-            p->pos.y * this->particleSize.y, this->particleSize.x,
-            this->particleSize.y, p->color);
-      }
-    }
+  void drawParticle(const vec2<u32> &pos) {
+      Particle *p = this->getParticle(pos);
+      DrawRectangle(p->pos.x * this->particleSize.x,
+          p->pos.y * this->particleSize.y, this->particleSize.x,
+          this->particleSize.y, p->color);
   }
 
   void updateParticles() {
+
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
     for(u32 y = 0; y < this->gridSize.y; ++y) {
       for(u32 x = 0; x < this->gridSize.x; ++x) {
+        this->drawParticle(vec2<u32>(x, y));
         Particle *p = this->getParticle(vec2<u32>(x, y));
-        if(p->type == SAND) {
-          if(getParticle(p->pos + vec2<u32>(0, 1))->type == EMPTY) {
-            this->move(p->pos, p->pos + vec2<u32>(0, 1));
-          } else if(getParticle(p->pos + vec2<u32>(1, 1))->type == EMPTY) {
-            this->move(p->pos, p->pos + vec2<u32>(1, 1));
-          } else if(getParticle(p->pos + vec2<u32>(0, 1) - vec2<u32>(1, 0))->type == EMPTY) {
-            this->move(p->pos, p->pos + vec2<u32>(0, 1) - vec2<u32>(1, 0));
+        switch(p->type) {
+          case(EMPTY):
+            break;
+          case(SAND):
+            if(getParticle(p->pos + vec2<u32>(0, 1))->type == EMPTY) {
+              this->move(p->pos, p->pos + vec2<u32>(0, 1));
+            } else if(getParticle(p->pos + vec2<u32>(1, 1))->type == EMPTY) {
+              this->move(p->pos, p->pos + vec2<u32>(1, 1));
+            } else if(getParticle(p->pos + vec2<u32>(0, 1) - vec2<u32>(1, 0))->type == EMPTY) {
+              this->move(p->pos, p->pos + vec2<u32>(0, 1) - vec2<u32>(1, 0));
+            }
+            break;
+          case(WALL):
+            break;
           }
-        }
       }
     }
+    EndDrawing();
   }
 
   void changeParticle(const vec2<f32> &pos, const ParticleType &type) {
@@ -88,7 +99,9 @@ struct ParticleManager {
     gridX = std::max(std::min(gridX, gridSize.x-1), static_cast<u32>(0));
     gridY = std::max(std::min(gridY, gridSize.y-1), static_cast<u32>(0));
     Particle *p = this->getParticle(vec2<u32>(gridX, gridY));
-    p->changeType(type);
+    if(p->type == EMPTY) {
+      p->changeType(type);
+    }
   }
 
   void move(const vec2<u32> &pos1, const vec2<u32> &pos2) {

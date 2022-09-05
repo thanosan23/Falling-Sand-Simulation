@@ -26,23 +26,20 @@ int main(UNUSED int argc, UNUSED char *argv[]) {
   ParticleManager particles(windowSize, gridSize);
 
   vec2<> mousePos;
+  ParticleType currentType = SAND;
 
   while(!WindowShouldClose()) {
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
       mousePos = vec2<>(GetMouseX(), GetMouseY());
-      particles.changeParticle(mousePos, SAND);
+      particles.changeParticle(mousePos, currentType);
     }
-
+    if(IsKeyPressed(49)) { // 1
+      currentType = SAND;
+    } else if(IsKeyPressed(50)) { // 2
+      currentType = WALL;
+    }
     particles.updateParticles();
-
-    // rendering
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
-
-    particles.drawParticles();
-
-    EndDrawing();
   }
 
   CloseWindow();
