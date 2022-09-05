@@ -17,7 +17,7 @@ int main(UNUSED int argc, UNUSED char *argv[]) {
   u8 fps = *applicationSettings["fps"].value<u8>();
 
   const vec2<u32> windowSize = vec2<u32>(width, height);
-  const vec2<u32> gridSize = vec2<u32>(160, 160);
+  const vec2<u32> gridSize = vec2<u32>(200, 200);
 
   // Initialize window
   InitWindow(width, height, name.c_str());
@@ -34,11 +34,13 @@ int main(UNUSED int argc, UNUSED char *argv[]) {
       mousePos = vec2<>(GetMouseX(), GetMouseY());
       particles.changeParticle(mousePos, currentType);
     }
+
     if(IsKeyPressed(49)) { // 1
       currentType = SAND;
     } else if(IsKeyPressed(50)) { // 2
       currentType = WALL;
     }
+
     particles.updateParticles();
   }
 
